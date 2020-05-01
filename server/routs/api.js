@@ -10,7 +10,7 @@ const router=express.Router()
 
 
 function verifytoken(req,res,next){
-  console.log('verifying')
+
   if(!req.headers.authorization){
     return res.status(401).send('unauthorized access')
   }
@@ -18,15 +18,23 @@ function verifytoken(req,res,next){
   if(token=='null'){
     return res.status(401).send('unauthorized access')
   }
-  
   let payload=jwt.verify(token,'secrect')
-  
+  console.log(payload.subject)
   if(!payload){
     return res.status(401).send('unauthorized access')
   }
+  id=payload.subject
+  User.findOne({_id: id},(err,user)=>{
+    if(!user){
+      console.log('no user exist')
+      return res.status(401).send('unauthorized access')
+    }else{
+      req.userId=payload.subject
+      next()
+    }
+  })
   
-  req.userId=payload.subject
-  next()
+
 }
 
 
